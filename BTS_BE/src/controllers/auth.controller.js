@@ -1,6 +1,6 @@
 import userModel from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
-
+import { sendRegistationEmail } from "../utils/sendEmail.js";
 /**
  * user register controller
  * post /api/auth/register
@@ -39,6 +39,7 @@ export const userRegister = async (req, res, next) => {
       },
       token,
     });
+    await sendRegistationEmail(user.email, user.username);
   } catch (error) {
     next(); //// global error middleware handle karega
   }
