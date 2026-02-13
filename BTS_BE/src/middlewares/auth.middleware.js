@@ -30,3 +30,23 @@ export const authMiddleware = async (req, res, next) => {
     });
   }
 };
+
+export const authSystemUserMiddleware=async(req,res,next)=>{
+  try {
+    const token=req.cookies.token || req.headers.authorization?.split(" ")[1]
+
+  if(!token){
+    return res.status(401).json({
+      message:"Unauthorized access token is missing"
+    })
+  }
+  const decode=jwt.verify(token,process.env.JWT_SECRET)
+  const user= await userModel.findById(decode.userId).select("+systemUser")
+  if(!user.systemUser){
+    
+  }
+  } catch (error) {
+    
+  }
+
+}

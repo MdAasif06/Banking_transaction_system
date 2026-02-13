@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { string } from "zod";
+import ledgerModel from "./ledger.model.js";
 
 const accountSchema = new mongoose.Schema(
   {
@@ -10,7 +10,7 @@ const accountSchema = new mongoose.Schema(
       index: true,
     },
     status: {
-      type: string,
+      type: String,
       enum: {
         values: ["active", "fronzen", "closed"],
         message: "Status can be either active, fronzen or closed",
@@ -29,3 +29,34 @@ accountSchema.index({ user: 1, status: 1 });
 
 const accountModel = mongoose.model("Account", accountSchema);
 export default accountModel;
+
+
+accountSchema.methods.getBalance = async function () {
+  const balanceData = await ledgerModel.aggregate([
+    { $match: { account: this._id } },
+    {
+      $group: {
+        _id: null,
+        totalDebit: {
+          $sum: {
+            $cond: [{ $eq: ["$type", "debit"] }, "$amount", 0],
+          },
+          totalCredit: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "credit"] }, "$amount", 0],
+            },
+          },
+          $ptoject: {
+            _id: 0,
+            balance: { $subtract: ["$totalCredit", "$totalDebit"] },
+          },
+        },
+      },
+    },
+  ]);
+
+  if (balanceData.length === 0) {
+    return 0;
+  }
+  return balanceData[0].balance;
+};
