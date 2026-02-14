@@ -12,7 +12,7 @@ const accountSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["active", "fronzen", "closed"],
+        values: ["active", "frozen", "closed"],
         message: "Status can be either active, fronzen or closed",
       },
       default: "active",
@@ -30,7 +30,6 @@ accountSchema.index({ user: 1, status: 1 });
 const accountModel = mongoose.model("Account", accountSchema);
 export default accountModel;
 
-
 accountSchema.methods.getBalance = async function () {
   const balanceData = await ledgerModel.aggregate([
     { $match: { account: this._id } },
@@ -41,16 +40,18 @@ accountSchema.methods.getBalance = async function () {
           $sum: {
             $cond: [{ $eq: ["$type", "debit"] }, "$amount", 0],
           },
-          totalCredit: {
+        },
+        totalCredit: {
             $sum: {
               $cond: [{ $eq: ["$type", "credit"] }, "$amount", 0],
             },
           },
-          $ptoject: {
-            _id: 0,
-            balance: { $subtract: ["$totalCredit", "$totalDebit"] },
-          },
-        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        balance: { $subtract: ["$totalCredit", "$totalDebit"] },
       },
     },
   ]);

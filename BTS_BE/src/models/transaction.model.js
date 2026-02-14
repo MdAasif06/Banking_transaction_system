@@ -16,14 +16,16 @@ const transactionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: { values: ["pending", "completed", "failed", "reversed"] },
-      message: "status can be either pending,completed,failed and reversed",
+      enum: {
+        values: ["pending", "completed", "failed", "reversed"],
+        message: "Status must be pending, completed, failed or reversed",
+      },
       default: "pending",
     },
     amount: {
       type: Number,
       required: [true, "Amount is required for creating a transaction"],
-      min: [0, "Transaction amount can not be negative"],
+      min: [1, "Transaction amount can not be negative"],
     },
     idempotencyKey: {
       type: String,
@@ -37,6 +39,16 @@ const transactionSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+transactionSchema.pre("validate", function () {
+  if (
+    this.fromAccount &&
+    this.toAccount &&
+    this.fromAccount.toString() === this.toAccount.toString()
+  ) {
+    throw new Error("Cannot transfer to same account");
+  }
+});
+
 
 const transactionModel = mongoose.model("Transaction", transactionSchema);
 export default transactionModel;

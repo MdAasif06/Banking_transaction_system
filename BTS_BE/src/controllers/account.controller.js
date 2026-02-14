@@ -12,6 +12,6 @@ export const createAccount = async (req, res, next) => {
       account,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };

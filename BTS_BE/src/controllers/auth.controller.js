@@ -41,7 +41,7 @@ export const userRegister = async (req, res, next) => {
     });
     await sendRegistationEmail(user.email, user.username);
   } catch (error) {
-    next(); //// global error middleware handle karega
+    return next(error); //// global error middleware handle karega
   }
 };
 
@@ -78,6 +78,6 @@ export const userLogin = async (req, res, next) => {
       token,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
