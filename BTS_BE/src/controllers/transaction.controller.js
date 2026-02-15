@@ -93,21 +93,25 @@ export const createTransaction = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     console.log("STEP 5: Transaction started");
-
-    const transaction = new transactionModel(
-      {
-        fromAccount,
-        toAccount,
-        amount,
-        idempotencyKey,
-        status: "pending",
-      },
-      /////////// { session },
-    );
+    let transaction;
+    transaction = (
+      await transactionModel.create(
+        [
+          {
+            fromAccount,
+            toAccount,
+            amount,
+            idempotencyKey,
+            status: "pending",
+          },
+        ],
+        { session },
+      )
+    )[0];
     console.log("STEP 6: Transaction created");
 
     // 6.Create DEBIT ledger entry
-    await ledgerModel.create(
+    const debitLedgerEntry = await ledgerModel.create(
       [
         {
           account: fromAccount,
@@ -120,7 +124,7 @@ export const createTransaction = async (req, res) => {
     );
     console.log("STEP 7: Debit entry done");
     //  7.Create CREDIT Ledger entry
-    await ledgerModel.create(
+    const creditLedgerEntry = await ledgerModel.create(
       [
         {
           account: toAccount,
@@ -133,8 +137,15 @@ export const createTransaction = async (req, res) => {
     );
     console.log("STEP 8: Credit entry done");
     // 8.Mark transaction COMPLETED
-    transaction.status = "completed";
-    await transaction.save({ session });
+    // transaction.status = "completed";
+    // await transaction.save({ session });
+    await transactionModel.findOneAndUpdate(
+      {
+        _id: transaction._id,
+      },
+      { status: "completed" },
+      { session },
+    );
 
     // 9.Commit MongoDB session
     await session.commitTransaction();
