@@ -90,25 +90,20 @@ export const createTransaction = async (req, res) => {
     }
 
     //  5.Create transaction (PENDING)
-    let transaction;
     const session = await mongoose.startSession();
     session.startTransaction();
     console.log("STEP 5: Transaction started");
 
-    transaction = (
-      await transactionModel.create(
-        [
-          {
-            fromAccount,
-            toAccount,
-            amount,
-            idempotencyKey,
-            status: "pending",
-          },
-        ],
-        { session },
-      )
-    )[0];
+    const transaction = new transactionModel(
+      {
+        fromAccount,
+        toAccount,
+        amount,
+        idempotencyKey,
+        status: "pending",
+      },
+      /////////// { session },
+    );
     console.log("STEP 6: Transaction created");
 
     // 6.Create DEBIT ledger entry
