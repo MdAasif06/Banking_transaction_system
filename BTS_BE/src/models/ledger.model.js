@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const ledgerSchema = new mongoose.Schema({
-  amount: {
+  account: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "account",
     required: [true, "Ledger must be associated with account"],

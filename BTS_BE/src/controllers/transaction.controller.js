@@ -173,18 +173,18 @@ export const createTransaction = async (req, res) => {
 export const createInitialFoundsTransaction = async (req, res, next) => {
   let session;
   try {
-    console.log("STEP 1: Request received v2");
+    // console.log("STEP 1: Request received v2");
     const { toAccount, amount, idempotencyKey } = req.body;
     if (!toAccount || !amount || !idempotencyKey) {
       return res.status(400).json({
         message: "toAccount , amount and idempotentcyKey are required",
       });
     }
-    console.log("STEP 2: Checking duplicate transaction v2");
+    // console.log("STEP 2: Checking duplicate transaction v2");
     const existingTransaction = await transactionModel.findOne({
       idempotencyKey,
     });
-    console.log("STEP 3: Fetching toAccount v2");
+    // console.log("STEP 3: Fetching toAccount v2");
     const toUserAccount = await accountModel.findOne({
       _id: toAccount,
     });
@@ -201,10 +201,10 @@ export const createInitialFoundsTransaction = async (req, res, next) => {
         message: "system account is not found",
       });
     }
-    console.log("STEP 4: Starting session v2");
+    // console.log("STEP 4: Starting session v2");
     session = await mongoose.startSession();
     session.startTransaction();
-    console.log("STEP 5: Creating transaction v2");
+    // console.log("STEP 5: Creating transaction v2");
     if (existingTransaction) {
       return res.status(409).json({
         message: "Duplicate transaction request",
@@ -219,7 +219,7 @@ export const createInitialFoundsTransaction = async (req, res, next) => {
       status: "pending",
     });
     await transaction.save({ session });
-    console.log("STEP 6: Creating debit entry v2");
+    // console.log("STEP 6: Creating debit entry v2");
     const debitLEdgerEntry = await ledgerModel.create(
       [
         {
@@ -231,7 +231,7 @@ export const createInitialFoundsTransaction = async (req, res, next) => {
       ],
       { session },
     );
-    console.log("STEP 7: Creating credit entry v2");
+    // console.log("STEP 7: Creating credit entry v2");
     const creditLedgerEntry = await ledgerModel.create(
       [
         {
@@ -243,13 +243,13 @@ export const createInitialFoundsTransaction = async (req, res, next) => {
       ],
       { session },
     );
-    console.log("STEP 8: Marking completed v2");
+    // console.log("STEP 8: Marking completed v2");
     transaction.status = "completed";
     await transaction.save({ session });
-    console.log("STEP 9: Committing v2");
+    // console.log("STEP 9: Committing v2");
     await session.commitTransaction();
     session.endSession();
-     console.log("STEP:10 suceescc")
+    //  console.log("STEP:10 suceescc")
     return res.status(201).json({
       message: "Initial funds transaction completed successfully",
       transaction: transaction,
@@ -259,8 +259,8 @@ export const createInitialFoundsTransaction = async (req, res, next) => {
       await session.abortTransaction();
       session.endSession();
     }
-    console.log("STEP 11: catch block found error");
-    console.log("❌ Transaction failed:", error.message);
-    next(error); // 👈 use next here instead of res.status
+    // console.log("STEP 11: catch block found error");
+    console.log(" Transaction failed:", error.message);
+    next(error); //  use next here instead of res.status
   }
 };
