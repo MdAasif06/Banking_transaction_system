@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
 import { sendRegistationEmail } from "../utils/sendEmail.js";
+import tokenBlackListModel from "../models/blackList.model.js";
 /**
  * user register controller
  * post /api/auth/register
@@ -80,4 +81,21 @@ export const userLogin = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+};
+
+export const userLogout = async (req, res) => {
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(200).json({
+      message: "User logout successfully",
+    });
+  }
+ 
+  await tokenBlackListModel.create({
+    token: token,
+  });
+  res.clearCookie("token")
+  res.status(200).json({
+    message:"User logout successful"
+  })
 };

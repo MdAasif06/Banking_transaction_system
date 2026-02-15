@@ -1,5 +1,6 @@
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import tokenBlackListModel from "../models/blackList.model.js";
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -10,6 +11,14 @@ export const authMiddleware = async (req, res, next) => {
         status: "failed",
       });
     }
+
+    const isBlackListed = await tokenBlackListModel.findOne({ token });
+    if (isBlackListed) {
+      return res.status(401).json({
+        message: "Unauthorized access token is invalid",
+      });
+    }
+
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     // const user=await userModel.findById(decode._id).select("-password")
     const user = await userModel.findById(decode.userId); //select() is not need because alredy false in userModel
@@ -35,8 +44,7 @@ export const authSystemUserMiddleware = async (req, res, next) => {
   try {
     // console.log(" authSystemUserMiddleware HIT");
 
-    const token =
-      req.cookies.token || req.headers.authorization?.split(" ")[1];
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
     // console.log("Token:", token);
 
@@ -46,13 +54,17 @@ export const authSystemUserMiddleware = async (req, res, next) => {
         message: "Unauthorized access token is missing",
       });
     }
+    const isBlackListed = await tokenBlackListModel.findOne({ token });
+    if (isBlackListed) {
+      return res.status(401).json({
+        message: "Unauthorized access token is invalid",
+      });
+    }
 
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     // console.log("Decoded:", decode);
 
-    const user = await userModel
-      .findById(decode.userId)
-      .select("+systemUser");
+    const user = await userModel.findById(decode.userId).select("+systemUser");
 
     // console.log("User:", user);
 
@@ -73,8 +85,7 @@ export const authSystemUserMiddleware = async (req, res, next) => {
     req.user = user;
 
     // console.log(" System user verified");
-    next();   //  THIS WAS MISSING
-
+    next(); //  THIS WAS MISSING
   } catch (error) {
     // console.log("Middleware error:", error.message);
     return res.status(401).json({
@@ -83,9 +94,6 @@ export const authSystemUserMiddleware = async (req, res, next) => {
     // next(error)
   }
 };
-
-
-
 
 // export const authSystemUserMiddleware = async (req, res, next) => {
 //   try {
