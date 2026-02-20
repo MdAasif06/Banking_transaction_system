@@ -32,31 +32,27 @@ This system handles account management, money transfers, transaction logging, an
 src/
 │
 ├── controllers/
+│   ├── account.controller.js
+│   └── transaction.controller.js
+│
 ├── models/
+│   ├── account.model.js
+│   ├── transaction.model.js
+│   └── ledger.model.js
+│
 ├── routes/
+│   ├── account.routes.js
+│   └── transaction.routes.js
+│
 ├── middlewares/
+│   └── error.middleware.js
+│
 ├── utils/
+│   └── idempotency.js
+│
 └── server.js
 
-foxicon/
-├── public/                 # Static assets
-│   └── logo.svg           # Logo files
-├── src/
-│   ├── components/        # Reusable UI components
-│   │   ├── Navbar.jsx     # Navigation with mobile drawer
-│   │   └── Layout.jsx     # Page layout wrapper
-│   ├── pages/             # Main pages
-│   │   ├── Home.jsx       # Landing page with animations
-│   │   ├── About.jsx      # About us page
-│   │   ├── Courses.jsx    # Courses listing
-│   │   ├── Projects.jsx   # Projects showcase
-│   │   ├── Bootcamps.jsx  # Bootcamps page
-│   │   └── Login.jsx      # Login page
-│   ├── App.jsx            # Main app with routing
-│   ├── main.jsx           # App entry point
-│   └── index.css          # Global styles
-├── package.json           # Dependencies & scripts
-└── README.md             # You are here! 📍
+
 
 🛡 Security Features
 
