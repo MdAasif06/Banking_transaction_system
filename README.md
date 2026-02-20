@@ -29,6 +29,7 @@ This system handles account management, money transfers, transaction logging, an
 ---
 
 ## 📂 Project Structure
+```
 src/
 │
 ├── controllers/
@@ -51,7 +52,7 @@ src/
 │   └── idempotency.js
 │
 └── server.js
-
+```
 
 
 🛡 Security Features
